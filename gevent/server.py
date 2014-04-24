@@ -4,6 +4,7 @@ import sys
 import _socket
 from gevent.baseserver import BaseServer
 from gevent.socket import EWOULDBLOCK, socket
+from gevent.hub import PYPY
 
 
 __all__ = ['StreamServer', 'DatagramServer']
@@ -78,9 +79,9 @@ class StreamServer(BaseServer):
             self.socket = self.get_listener(self.address, self.backlog, self.family)
             self.address = self.socket.getsockname()
         if self.ssl_args:
-            self._handle = self.wrap_socket_and_handle
+            self._handle = self.ssl_handle
         else:
-            self._handle = self.handle
+            self._handle = self.tcp_handle
 
     @classmethod
     def get_listener(self, address, backlog=None, family=None):
@@ -95,12 +96,27 @@ class StreamServer(BaseServer):
             if err.args[0] == EWOULDBLOCK:
                 return
             raise
-        return socket(_sock=client_socket), address
+        sockobj = socket(_sock=client_socket)
+        if PYPY:
+            client_socket._drop()
+        return sockobj, address
 
-    def wrap_socket_and_handle(self, client_socket, address):
+    def do_close(self, socket, *args):
+        socket.close()
+
+    def tcp_handle(self, client_socket, address):
+        try:
+            return self.handle(client_socket, address)
+        finally:
+            client_socket.close()
+
+    def ssl_handle(self, client_socket, address):
         # used in case of ssl sockets
         ssl_socket = self.wrap_socket(client_socket, **self.ssl_args)
-        return self.handle(ssl_socket, address)
+        try:
+            return self.handle(ssl_socket, address)
+        finally:
+            ssl_socket.close()
 
 
 class DatagramServer(BaseServer):
