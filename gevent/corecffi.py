@@ -800,11 +800,14 @@ class watcher(object):
         return self._callback
 
     def _set_callback(self, callback):
-        assert callable(callback)
+        if not callable(callback) and callback is not None:
+            raise TypeError("Expected callable, not %r" % (callback, ))
         self._callback = callback
     callback = property(_get_callback, _set_callback)
 
     def start(self, callback, *args):
+        if callback is None:
+            raise TypeError('callback must be callable, not None')
         self.callback = callback
         self.args = args
         self._libev_unref()
@@ -909,6 +912,8 @@ class timer(watcher):
         watcher.__init__(self, loop, ref=ref, priority=priority, args=(after, repeat))
 
     def start(self, callback, *args, **kw):
+        if callback is None:
+            raise TypeError('callback must be callable, not None')
         update = kw.get("update", True)
         self.callback = callback
         self.args = args

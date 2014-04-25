@@ -44,8 +44,14 @@ if CPYTHON_DBG:
 
 
 if PYPY:
-    # stat watchers are not implemented on pypy
-    FAILING_TESTS += ['test__core_stat.py']
+    FAILING_TESTS += [
+        # stat watchers are not implemented on pypy
+        'test__core_stat.py',
+
+        # https://bugs.pypy.org/issue1743
+        'test__real_greenlet.py',
+        'test__exc_info.py',
+    ]
 
 
 if __name__ == '__main__':
