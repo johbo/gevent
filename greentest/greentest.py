@@ -397,7 +397,7 @@ def walk_modules(basedir=None, modpath=None, include_so=False, recursive=False):
             x = fn[:-3]
             if x.endswith('_d'):
                 x = x[:-2]
-            if x in ['__init__', 'core', 'ares', '_util', 'corecffi']:
+            if x in ['__init__', 'core', 'ares', '_util', '_semaphore', 'corecffi']:
                 continue
             if x in OPTIONAL_MODULES:
                 try:
