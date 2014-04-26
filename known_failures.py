@@ -68,8 +68,8 @@ if PYPY:
 
         # check_sendall_interrupted and testInterruptedTimeout fail due to
         # https://bitbucket.org/cffi/cffi/issue/152/handling-errors-from-signal-handlers-in
-        '-m monkey_test test_socket.py'
-        '-m monkey_test --Event test_socket.py'
+        '-m monkey_test test_socket.py',
+        '-m monkey_test --Event test_socket.py',
 
         # No idea!
         'test_threading_2.py',
