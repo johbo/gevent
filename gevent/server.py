@@ -105,18 +105,12 @@ class StreamServer(BaseServer):
         socket.close()
 
     def tcp_handle(self, client_socket, address):
-        try:
-            return self.handle(client_socket, address)
-        finally:
-            pass # client_socket.close()
+        return self.handle(client_socket, address)
 
     def ssl_handle(self, client_socket, address):
         # used in case of ssl sockets
         ssl_socket = self.wrap_socket(client_socket, **self.ssl_args)
-        try:
-            return self.handle(ssl_socket, address)
-        finally:
-            pass # ssl_socket.close()
+        return self.handle(ssl_socket, address)
 
 
 class DatagramServer(BaseServer):
