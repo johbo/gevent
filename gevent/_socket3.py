@@ -17,6 +17,7 @@ __extensions__ = _socketcommon.__extensions__
 __imports__ = _socketcommon.__imports__
 __dns__ = _socketcommon.__dns__
 
+dup = __socket__.dup
 
 SocketIO = __socket__.SocketIO
 
