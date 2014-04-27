@@ -26,6 +26,10 @@ if fcntl is None:
 
     __all__.remove('FileObjectPosix')
 
+elif sys.version_info.major >= 3:
+    # TODO: What to do here?
+    pass
+
 else:
 
     from gevent.socket import _fileobject, _get_memory
