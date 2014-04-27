@@ -47,12 +47,10 @@ class socket(_socket.socket):
 
     @property
     def type(self):
-        # TODO: check this, SOCK_NONBLOCK does not exist on MacOSX
-        t = _socket.socket.type.__get__(self)
-        if hasattr(_socket, 'SOCK_NONBLOCK'):
-            t = t & ~_socket.SOCK_NONBLOCK
-        return t
-
+        if self.timeout != 0.0 and hasattr(_socket, 'SOCK_NONBLOCK'):
+            return _socket.socket.type.__get__(self) & ~_socket.SOCK_NONBLOCK
+        else:
+            return _socket.socket.type.__get__(self)
 
     def __enter__(self):
         return self
