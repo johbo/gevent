@@ -4,7 +4,7 @@ import sys
 import _socket
 from gevent.baseserver import BaseServer
 from gevent.socket import EWOULDBLOCK, socket
-from gevent.hub import PYPY
+from gevent.hub import PYPY, PY3
 
 
 __all__ = ['StreamServer', 'DatagramServer']
@@ -70,7 +70,7 @@ class StreamServer(BaseServer):
     def set_listener(self, listener):
         BaseServer.set_listener(self, listener)
         try:
-            if sys.version_info[0] == 2:
+            if not PY3:
                 self.socket = self.socket._sock
         except AttributeError:
             pass
@@ -91,7 +91,7 @@ class StreamServer(BaseServer):
         return _tcp_listener(address, backlog=backlog, reuse_addr=self.reuse_addr, family=family)
 
     def do_read(self):
-        if sys.version_info[0] == 3:
+        if PY3:
             return self._do_read_3()
         else:
             return self._do_read_2()
@@ -145,10 +145,10 @@ class DatagramServer(BaseServer):
             self.address = self.socket.getsockname()
         self._socket = self.socket
         try:
-            if sys.version_info[0] == 2:
-                self._socket = self._socket._sock
-            else:
+            if PY3:
                 self._socket = super(socket, self._socket)
+            else:
+                self._socket = self._socket._sock
         except AttributeError:
             pass
 
