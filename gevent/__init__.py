@@ -9,7 +9,7 @@ See http://www.gevent.org/ for the documentation.
 from __future__ import absolute_import
 
 version_info = (1, 1, 0, 'dev', None)
-__version__ = '1.1-dev-20140427'
+__version__ = '1.1-dev-20140506'
 
 
 __all__ = ['get_hub',
