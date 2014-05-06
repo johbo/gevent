@@ -5,6 +5,8 @@ import _socket
 from gevent.baseserver import BaseServer
 from gevent.socket import EWOULDBLOCK, socket
 from gevent.hub import PYPY, PY3
+if PY3:
+    from io import BlockingIOError
 
 
 __all__ = ['StreamServer', 'DatagramServer']
@@ -90,32 +92,33 @@ class StreamServer(BaseServer):
             backlog = self.backlog
         return _tcp_listener(address, backlog=backlog, reuse_addr=self.reuse_addr, family=family)
 
-    def do_read(self):
-        if PY3:
-            return self._do_read_3()
-        else:
-            return self._do_read_2()
+    if PY3:
 
-    def _do_read_3(self):
-        try:
-            fd, address = self.socket._accept()
-        except _socket.error as err:
-            if err.args[0] == EWOULDBLOCK:
-                return
-            raise
-        return socket(fileno=fd), address
+        def do_read(self):
+            sock = self.socket
+            try:
+                fd, address = sock._accept()
+            except BlockingIOError:
+                if sock.timeout == 0.0:
+                    return
+                raise
+            sock = socket(sock.family, sock.type, sock.proto, fileno=fd)
+            # XXX Python issue #7995?
+            return sock, address
 
-    def _do_read_2(self):
-        try:
-            client_socket, address = self.socket.accept()
-        except _socket.error as err:
-            if err.args[0] == EWOULDBLOCK:
-                return
-            raise
-        sockobj = socket(_sock=client_socket)
-        if PYPY:
-            client_socket._drop()
-        return sockobj, address
+    else:
+
+        def do_read(self):
+            try:
+                client_socket, address = self.socket.accept()
+            except _socket.error as err:
+                if err.args[0] == EWOULDBLOCK:
+                    return
+                raise
+            sockobj = socket(_sock=client_socket)
+            if PYPY:
+                client_socket._drop()
+            return sockobj, address
 
     def do_close(self, socket, *args):
         socket.close()

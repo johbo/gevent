@@ -331,8 +331,8 @@ cdef public class channel [object PyGeventAresChannelObject, type PyGeventAresCh
             try:
                 index = 0
                 for server in servers:
-                    if isinstance(server, text_type):
-                        server = server.encode('ascii')
+                    if isinstance(server, str):
+                        server = server.encode()
                     string = <char*?>server
                     if cares.ares_inet_pton(AF_INET, string, &c_servers[index].addr) > 0:
                         c_servers[index].family = AF_INET
